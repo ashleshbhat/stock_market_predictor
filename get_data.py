@@ -10,6 +10,7 @@
 
 import requests
 import csv
+import os
 
 #=====================================================
 
@@ -35,12 +36,15 @@ def get_stock(stock_name ="AAPL",series="daily",data_type="csv",output_size="com
 
     if(series == "intraday"):
         response = requests.get("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval="+interval+"min&outputsize="+output_size+"&symbol="+stock_name+"&apikey=KJLE898BN5KOBVS6&datatype="+data_type)
-        with open(stock_name+"_"+series+"_"+output_size+"_"+interval+"."+data_type,"w", newline= '') as file:     
+        filename = "data/"+stock_name+"/"+stock_name+"_"+series+"_"+output_size+"_"+interval+"."+data_type
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename,"w", newline= '') as file:     
             file.writelines(response.text)
     else:
         if(series == "daily"):
             response = requests.get("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize="+output_size+"&symbol="+stock_name+"&apikey=KJLE898BN5KOBVS6&datatype="+data_type)
-            with open(stock_name+"_"+series+"_"+output_size+"."+data_type,"w", newline= '') as file:     
+            filename = "data/"+stock_name+"/"+stock_name+"_"+series+"_"+output_size+"."+data_type
+            with open(filename,"w", newline= '') as file:     
                 file.writelines(response.text)
         else:
             print("Wrong series type."+series+" does not exist!"+"your options are intraday or daily")
@@ -49,6 +53,6 @@ def get_stock(stock_name ="AAPL",series="daily",data_type="csv",output_size="com
 
 #==================================
 #example
-#res = get_stock("AAPL","intraday",data_type="json")
+res = get_stock("ABEO","intraday",data_type="csv")
 
-
+print(type(res.text))
