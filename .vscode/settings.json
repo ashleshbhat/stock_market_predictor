@@ -1,6 +1,6 @@
 {
     "python.linting.enabled": true,
-    "python.pythonPath": "C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python36\\python.exe",
+    "python.pythonPath": "C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python36\\python3.exe",
     "python.linting.pylintEnabled": false,
     "python.linting.prospectorEnabled": false,
     "python.linting.flake8Enabled": true
