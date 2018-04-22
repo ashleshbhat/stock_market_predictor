@@ -14,6 +14,7 @@ import get_data
 import numpy as np 
 import matplotlib.pyplot as plt 
 from scipy import signal
+
 #get_data.get_stock("BAC","intraday",output_size="full")
 with open("BAC_intraday_full_1.csv","r", newline= '') as file:
     reader = csv.reader(file)
