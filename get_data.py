@@ -71,10 +71,32 @@ def get_all_companies():
     
     company_data = np.array(company_data) 
      
-    for row in range (0,len(company_data)-1):
+    for row in range (0,len(company_data)):
         print("working on "+company_data[row][0])
         get_stock(company_data[row][0],"daily",data_type="csv",output_size="full")
         get_stock(company_data[row][0],"intraday",data_type="csv",output_size="full")
 
 
-get_all_companies()
+#get_all_companies()
+
+def parse_intra_day():
+    filename = "data/NASDAQ_companies.csv"
+    with open(filename,"r",newline= '') as file:
+        reader = csv.reader(file, lineterminator = '\n')
+        company_data = list(reader)
+    
+    company_data = np.array(company_data)
+    for row in range (0,10):
+        print("working on "+company_data[row][0])
+        filename_intraday = "data/"+company_data[row][0]+"/"+company_data[row][0]+"_intraday_full_1.csv"
+        with open(filename,"r",newline= '') as file:
+            reader = csv.reader(file, lineterminator = '\n')
+            company_data_single = list(reader)
+            for row in range(0,5):
+                print(company_data_single[row][0])
+                #filename = "data/"+company_data[row][0]+"/"+"intra_day_split/"+date+"."+data_type
+                #os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+
+
+#parse_intra_day()
