@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!python3
 # -*- coding: utf-8 -*-
 
 # ==================================
@@ -10,9 +10,13 @@
 
 import requests
 import csv
+import os
+import numpy as np
 
 #=====================================================
-
+"""All data recieved from this is stored in a zip file in google drive at 
+https://drive.google.com/open?id=1eS2CROcg1sbjUuRLnLSrkSVVGhTqMAT3
+"""
 
 
 def get_stock(stock_name ="AAPL",series="daily",data_type="csv",output_size="compact",interval ="1",print_to_file=1):
@@ -35,13 +39,21 @@ def get_stock(stock_name ="AAPL",series="daily",data_type="csv",output_size="com
 
     if(series == "intraday"):
         response = requests.get("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval="+interval+"min&outputsize="+output_size+"&symbol="+stock_name+"&apikey=KJLE898BN5KOBVS6&datatype="+data_type)
-        with open("C:/Users/user/Documents/GitHub/stock_market_predictor/"+stock_name+"_"+series+"_"+output_size+"_"+interval+"."+data_type,"w", newline= '') as file:     
-            file.writelines(response.text)
+        filename = "data/"+stock_name+"/"+stock_name+"_"+series+"_"+output_size+"_"+interval+"."+data_type
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        text = response.text.split('\n',1)[-1]                      #remove first line which is shit
+        with open(filename,"w", newline= '') as file:     
+            file.writelines(text)
+        print("file written to "+filename)
     else:
         if(series == "daily"):
             response = requests.get("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize="+output_size+"&symbol="+stock_name+"&apikey=KJLE898BN5KOBVS6&datatype="+data_type)
-            with open("C:/Users/user/Documents/GitHub/stock_market_predictor/"+stock_name+"_"+series+"_"+output_size+"."+data_type,"w", newline= '') as file:     
-                file.writelines(response.text)
+            filename = "data/"+stock_name+"/"+stock_name+"_"+series+"_"+output_size+"."+data_type
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+            text = response.text.split('\n',1)[-1]
+            with open(filename,"w", newline= '') as file:     
+                file.writelines(text)
+            print("file written to "+filename)
         else:
             print("Wrong series type."+series+" does not exist!"+"your options are intraday or daily")
             return
@@ -49,6 +61,62 @@ def get_stock(stock_name ="AAPL",series="daily",data_type="csv",output_size="com
 
 #==================================
 #example
-# res = get_stock("AAPL","intraday",data_type="json")
+#res = get_stock("ABEO","daily",data_type="csv")
+
+#print(type(res.text))
+
+def get_all_companies():
+    filename = "data/NASDAQ_companies.csv"
+    with open(filename,"r",newline= '') as file:
+        reader = csv.reader(file, lineterminator = '\n')
+        company_data = list(reader)
+    
+    company_data = np.array(company_data) 
+     
+    for row in range (0,len(company_data)):
+        print("working on "+company_data[row][0])
+        get_stock(company_data[row][0],"daily",data_type="csv",output_size="full")
+        get_stock(company_data[row][0],"intraday",data_type="csv",output_size="full")
 
 
+#get_all_companies()
+
+def parse_intra_day():
+    """This function takes chunks of intra day data and converts to csv file for each day stored in th
+    folder days under each stock folder
+    """
+    filename = "data/NASDAQ_companies.csv"
+    with open(filename,"r",newline= '') as file:
+        reader = csv.reader(file, lineterminator = '\n')
+        company_data = list(reader)
+    
+    company_data = np.array(company_data)
+    for row1 in range (300,800): #len(company_data)
+        print("working on "+company_data[row1][0])
+        filename_intraday = "data/"+company_data[row1][0]+"/"+company_data[row1][0]+"_intraday_full_1.csv"
+        with open(filename_intraday,"r",newline= '') as file:
+            reader = csv.reader(file,   lineterminator = '\n')
+            company_data_single = list(reader)
+            current_date = str(company_data_single[0][0]).split(" ")[0]
+            if(current_date == "\t<html>"): #error pages
+                continue
+            current_data = []
+            
+            for row in range(0,len(company_data_single)):
+                read_date = str(company_data_single[row][0]).split(" ")[0]
+                #print(read_date)
+                if(read_date == current_date):
+                    current_data.append(company_data_single[row])
+                        
+                else:
+                    if(read_date != current_data) or (row == len(company_data_single)-1):
+                        
+                        date_filename = "data/"+company_data[row1][0]+"/date/"+current_date+".csv"
+                        os.makedirs(os.path.dirname(date_filename), exist_ok=True)
+                        with open(date_filename, 'w',newline='') as myfile:
+                            write = csv.writer(myfile, quoting=csv.QUOTE_NONE,escapechar=',')
+                            write.writerows(current_data)
+                        
+                        current_date = str(company_data_single[row][0]).split(" ")[0]
+                        current_data = []
+                    
