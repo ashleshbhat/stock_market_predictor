@@ -132,6 +132,6 @@ def return_stats_intra(company,date, plot=0):
 """ 
 input arguments ("Company Name", "Date", 0 or 1 for plotting)
 """
-[a,b,c,d,e,f,g,h] =return_stats_intra("AAPL","2018-04-20",plot=1)
+# [a,b,c,d,e,f,g,h] =return_stats_intra("AAPL","2018-04-20",plot=1)
 
 
