@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # ==================================
-#Get Data set fr    om the Alpha Vantage api 
+#Get Data set from the Alpha Vantage api 
 
 # 
 #  ==================================
@@ -41,7 +41,7 @@ def get_stock(stock_name ="AAPL",series="daily",data_type="csv",output_size="com
         response = requests.get("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval="+interval+"min&outputsize="+output_size+"&symbol="+stock_name+"&apikey=KJLE898BN5KOBVS6&datatype="+data_type)
         filename = "data/"+stock_name+"/"+stock_name+"_"+series+"_"+output_size+"_"+interval+"."+data_type
         os.makedirs(os.path.dirname(filename), exist_ok=True)
-        text = response.text.split('\n',1)[-1]                      #remove first line which is shit
+        text = response.text                      #remove first line which is shit
         with open(filename,"w", newline= '') as file:     
             file.writelines(text)
         print("file written to "+filename)
@@ -50,7 +50,7 @@ def get_stock(stock_name ="AAPL",series="daily",data_type="csv",output_size="com
             response = requests.get("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize="+output_size+"&symbol="+stock_name+"&apikey=KJLE898BN5KOBVS6&datatype="+data_type)
             filename = "data/"+stock_name+"/"+stock_name+"_"+series+"_"+output_size+"."+data_type
             os.makedirs(os.path.dirname(filename), exist_ok=True)
-            text = response.text.split('\n',1)[-1]
+            text = response.text
             with open(filename,"w", newline= '') as file:     
                 file.writelines(text)
             print("file written to "+filename)
@@ -61,9 +61,9 @@ def get_stock(stock_name ="AAPL",series="daily",data_type="csv",output_size="com
 
 #==================================
 #example
-#res = get_stock("ABEO","daily",data_type="csv")
+# res = get_stock("ABEO","daily",data_type="csv")
 
-#print(type(res.text))
+# print(type(res.text))
 
 def get_all_companies():
     filename = "data/NASDAQ_companies.csv"
@@ -91,7 +91,7 @@ def parse_intra_day():
         company_data = list(reader)
     
     company_data = np.array(company_data)
-    for row1 in range (300,800): #len(company_data)
+    for row1 in range (0,800): #len(company_data)
         print("working on "+company_data[row1][0])
         filename_intraday = "data/"+company_data[row1][0]+"/"+company_data[row1][0]+"_intraday_full_1.csv"
         with open(filename_intraday,"r",newline= '') as file:
@@ -120,3 +120,6 @@ def parse_intra_day():
                         current_date = str(company_data_single[row][0]).split(" ")[0]
                         current_data = []
                     
+
+# parse_intra_day()
+# get_stock(stock_name ="AAPL",series="intraday",data_type="csv",output_size="compact",interval ="1",print_to_file=1)
