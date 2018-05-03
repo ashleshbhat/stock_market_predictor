@@ -48,10 +48,10 @@ def playground():
     print (total)
 
 def process_stock(stock="AAPL"):
-    Apple = load_stock_data_daily(stock)
-    Apple.info()
+    stockData = load_stock_data_daily(stock)
+    stockData.info()
     # get first degree difference
-    d1= Apple["close"].diff()
+    d1= stockData["close"].diff()
     plt.plot(d1,color="red", label="Diff1")
     plt.legend(loc='best')
     plt.show()
