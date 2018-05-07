@@ -1,4 +1,6 @@
-#! python3
+
+#!/usr/bin/env python3
+
 # -*- coding: utf-8 -*-
 
 # importing libraries
@@ -128,5 +130,12 @@ def return_stats_intra(company,date, plot=0):
         print("NO info available for the company "+ company +" for the date "+date)
         return 
 
-#how to use
-#[a,b,c,d,e,f,g,h] =return_stats_intra("GOOGL","2018-04-17",plot=1)
+
+# how to use
+""" 
+input arguments ("Company Name", "Date", 0 or 1 for plotting)
+"""
+# [a,b,c,d,e,f,g,h] =return_stats_intra("AAPL","2018-04-20",plot=1)
+
+
+
