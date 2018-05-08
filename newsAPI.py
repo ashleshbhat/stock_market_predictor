@@ -8,7 +8,7 @@ import csv
 import datetime
 import time
 
-def get_news_data(days=1,stock = 'AAPL',keyword = 'Apple'):
+def get_news_data(days=5,stock = 'AAPL',keyword = 'Apple'):
     """
     get_news data gets all top daily news using google news api using the keyword 
     parses then and counts the number of positive and negative words used
@@ -24,8 +24,7 @@ def get_news_data(days=1,stock = 'AAPL',keyword = 'Apple'):
     date_end = datetime.date.today()
     date_begin = date_end - datetime.timedelta(days = 1)
 
-    pos =0
-    neg =0
+    
 
     header = ['date','positive','negative']
 
@@ -37,6 +36,9 @@ def get_news_data(days=1,stock = 'AAPL',keyword = 'Apple'):
 
     for days in range(0,days):
         data_to_write = []
+        pos =0
+        neg =0
+        print(date_begin)
         for sources in sources:
             url1 = ('https://newsapi.org/v2/everything?'
             'q='+keyword+'&'
@@ -46,12 +48,13 @@ def get_news_data(days=1,stock = 'AAPL',keyword = 'Apple'):
                 '&'
             'to='+str(date_end)+'T00:00:00&'
             'sortBy=popularity&'
-            'apiKey=d68a6a0610df45188b1f61f78cc1f54c')
+            'apiKey=b543043c6ded4cb59b9e1795d20ece02')#d68a6a0610df45188b1f61f78cc1f54c')
             # print(url1) 
             
             response = requests.get(url1)
 
             data = (response.json())
+            #print(data)
             for data in data['articles']:
                 title = str(data['title']).upper()
                 body = str(data['description']).upper()
@@ -80,3 +83,4 @@ def get_news_data(days=1,stock = 'AAPL',keyword = 'Apple'):
         date_end = date_end - datetime.timedelta(days = 1)
         date_begin = date_end - datetime.timedelta(days = 1)
 
+# get_news_data()
