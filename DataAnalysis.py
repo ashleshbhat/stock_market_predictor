@@ -30,6 +30,9 @@ def load_stock_data_daily(company="AAPL", output_size="compact"):
     date_filename = "data/"+company+"/"+company+"_daily_"+output_size+".csv"
     return pd.read_csv(date_filename, parse_dates=['date'])
 
+def load_news(company):
+    return pd.read_csv(company+"/news_Apple.csv", parse_dates=['date'])
+
 def playground():
     stock_data = load_stock_data_daily("AAPL")
     stock_data.head()
