@@ -86,7 +86,7 @@ def process_stock(stock="AAPL"):
     appleNews = load_news("AAPL")
     appleNews.set_index('date', inplace=True)
     # create rating column and normalize values
-    appleNews['rating'] = (appleNews.positive - appleNews.negative)/(appleNews.positive + appleNews.negative)
+    appleNews['rating'] = (appleNews.positive - appleNews.negative)/(appleNews.positive + abs(appleNews.negative))
     appleNews.info()
     plot_bargraph(appleNews.index, appleNews.rating, "newsClassification", "weekly")
     # print(appleNews) 
@@ -103,6 +103,8 @@ def process_stock(stock="AAPL"):
     pd.plotting.scatter_matrix(stockData[["firstDiffAbs","newsRating"]])
     pd.plotting.scatter_matrix(stockData[["close","newsRating"]])
     plt.show()
+
+    stockData.to_csv("AAPL/stockData.csv")
     # print(appleNews['2018-05-08 '])
 # =======================================
 process_stock()
