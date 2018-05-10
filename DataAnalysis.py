@@ -23,6 +23,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler,MinMaxScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
+import sklearn.metrics as metrics
 # import numerical_algo
 
 
@@ -97,6 +98,10 @@ def training(k=5):
 
     CM = confusion_matrix (Yp, Ytest)
     print (CM)
+    accur = metrics.accuracy_score(Ytest,Yp)
+    precision = metrics.precision_score(Ytest,Yp, average="macro")
+    print ("Accuracy: ",accur,"\nPrecisionScore: ", precision)
+
 
 
 def process_stock(stock="AAPL", _print=False):
