@@ -74,7 +74,7 @@ def process_stock(stock="AAPL"):
 
     # get first degree difference
     # Abs
-    stockData['firstDiffAbs'] = stockData["close"].diff() 
+    stockData['firstDiffAbs'] = stockData["close"].diff(periods=-1)
     # percentage
     stockData['firstDiff_%'] = stockData.firstDiffAbs/stockData.close * 100
     
