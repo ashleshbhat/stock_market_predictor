@@ -19,6 +19,10 @@ import matplotlib.dates as mdates
 from scipy import signal
 import os
 import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler,MinMaxScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_matrix
 # import numerical_algo
 
 
@@ -68,7 +72,34 @@ def plot_bargraph(x, _data, _label="no_label", frame="weekly",_color="red"):
     
     plt.show()
 
-def process_stock(stock="AAPL"):
+def training(k=5):
+    # print (stockData.info())
+    stockData = pd.read_csv("AAPL/stockData.csv")
+    stockData.dropna()
+
+    X = stockData.drop("Action", axis=1)
+    X = X.drop("date", axis=1)
+    Y = stockData["Action"].copy()
+
+    Xtrain, Xtest = train_test_split(X, test_size=0.2, random_state=k)
+    Ytrain, Ytest = train_test_split(Y, test_size=0.2, random_state=k)
+    # print (train)
+    # print(test)
+    
+    model = RandomForestClassifier()
+    # train the model
+    model.fit(Xtrain, Ytrain)
+    # test the model
+    Yp = model.predict(Xtest)
+
+    print(Yp)
+    print(Ytest)
+
+    CM = confusion_matrix (Yp, Ytest)
+    print (CM)
+
+
+def process_stock(stock="AAPL", _print=False):
     stockData = load_stock_data_daily(stock, "compact")
     stockData.set_index('date',inplace=True)
 
@@ -88,7 +119,8 @@ def process_stock(stock="AAPL"):
     # create rating column and normalize values
     appleNews['rating'] = (appleNews.positive - appleNews.negative)/(appleNews.positive + abs(appleNews.negative))
     appleNews.info()
-    plot_bargraph(appleNews.index, appleNews.rating, "newsClassification", "weekly")
+    if(_print): 
+        plot_bargraph(appleNews.index, appleNews.rating, "newsClassification", "weekly")
     # print(appleNews) 
 
     # add newsinfo as colum to stockdata
@@ -100,11 +132,15 @@ def process_stock(stock="AAPL"):
     # stockData.drop("open", axis=1, inplace=True)
     stockData.info()
     stockData.corr() # see and plot correlations 
-    pd.plotting.scatter_matrix(stockData[["firstDiffAbs","newsRating"]])
-    pd.plotting.scatter_matrix(stockData[["close","newsRating"]])
+    if(_print):
+        pd.plotting.scatter_matrix(stockData[["firstDiffAbs","newsRating"]])
+        pd.plotting.scatter_matrix(stockData[["close","newsRating"]])
     plt.show()
 
     stockData.to_csv("AAPL/stockData.csv")
+
+    return stockData
     # print(appleNews['2018-05-08 '])
 # =======================================
-process_stock()
+# data = process_stock(_print=False)
+training()
