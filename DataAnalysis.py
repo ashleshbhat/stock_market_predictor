@@ -28,12 +28,12 @@ import sklearn.metrics as metrics
 
 
 def load_stock_data_intraday(company,date):
-    date_filename = "data/"+company+"/date/"+date+".csv"
-    return pd.read_csv(date_filename, parse_dates=['date'])
+    data_filename = "data/"+company+"/date/"+date+".csv"
+    return pd.read_csv(data_filename, parse_dates=['timestamp'])
 
 def load_stock_data_daily(company="AAPL", output_size="compact"):
-    date_filename = "data/"+company+"/"+company+"_daily_"+output_size+".csv"
-    return pd.read_csv(date_filename, parse_dates=['date'])
+    data_filename = "data/"+company+"/"+company+"_daily_"+output_size+".csv"
+    return pd.read_csv(data_filename, parse_dates=['timestamp'])
 
 def load_news(company="AAPL"):
     return pd.read_csv(company+"/news_Apple.csv", parse_dates=['date'])
@@ -73,19 +73,28 @@ def plot_bargraph(x, _data, _label="no_label", frame="weekly",_color="red"):
     
     plt.show()
 
-def training(k=5):
+def training(file, k=5):
     # print (stockData.info())
-    stockData = pd.read_csv("AAPL/stockData.csv")
+    stockData = pd.read_csv(file)
     stockData.dropna()
+    # drop the columns open, high and low
+    stockData.drop("open", axis=1, inplace=True)
+    stockData.drop("high", axis=1, inplace=True)
+    stockData.drop("low", axis=1, inplace=True)
 
+    # save features to X
     X = stockData.drop("Action", axis=1)
-    X = X.drop("date", axis=1)
+    X = X.drop("timestamp", axis=1)
+    # save target to Y - in our case the Action to do (Put/Call)
     Y = stockData["Action"].copy()
 
+    # split into training and test set
     Xtrain, Xtest = train_test_split(X, test_size=0.2, random_state=k)
     Ytrain, Ytest = train_test_split(Y, test_size=0.2, random_state=k)
     # print (train)
     # print(test)
+    Xtrain.info()
+    Xtest.info()
     
     model = RandomForestClassifier()
     # train the model
@@ -93,9 +102,7 @@ def training(k=5):
     # test the model
     Yp = model.predict(Xtest)
 
-    print(Yp)
-    print(Ytest)
-
+    # create confusion matrix
     CM = confusion_matrix (Yp, Ytest)
     print (CM)
     accur = metrics.accuracy_score(Ytest,Yp)
@@ -104,48 +111,42 @@ def training(k=5):
 
 
 
-def process_stock(stock="AAPL", _print=False):
-    stockData = load_stock_data_daily(stock, "compact")
-    stockData.set_index('date',inplace=True)
+def process_stock(stock="AAPL", _print=False, _type="compact",_loadnews=False):
+    stockData = load_stock_data_daily(stock, _type)
+    stockData.set_index('timestamp',inplace=True)
 
     # get first degree difference
     # Abs
     stockData['firstDiffAbs'] = stockData["close"].diff(periods=-1)
     # percentage
     stockData['firstDiff_%'] = stockData.firstDiffAbs/stockData.close * 100
-    
-    # plot_bargraph(stockData.index, stockData['firstDiffAbs'], "Diff1Abs", "blue")
-    # plot_bargraph(stockData.index, stockData['firstDiff_%'], "Diff1_%", "red")
 
-    # stockData.info()
-    # print (stockData)
-    appleNews = load_news("AAPL")
-    appleNews.set_index('date', inplace=True)
-    # create rating column and normalize values
-    appleNews['rating'] = (appleNews.positive - appleNews.negative)/(appleNews.positive + abs(appleNews.negative))
-    appleNews.info()
-    if(_print): 
-        plot_bargraph(appleNews.index, appleNews.rating, "newsClassification", "weekly")
-    # print(appleNews) 
+    # check if news information shall be loaded for the stock
+    if(_loadnews):
+        appleNews = load_news(stock)
+        appleNews.set_index('date', inplace=True)
+        # create rating column and normalize values
+        appleNews['rating'] = (appleNews.positive - appleNews.negative)/(appleNews.positive + abs(appleNews.negative))
+        appleNews.info()
+        if(_print): 
+            # print news classification
+            plot_bargraph(appleNews.index, appleNews.rating, "newsClassification", "weekly")
 
-    # add newsinfo as colum to stockdata
-    stockData['newsRating'] = appleNews['rating']
-    # stockData.dropna()
-    stockData.drop("open", axis=1, inplace=True)
-    stockData.drop("high", axis=1, inplace=True)
-    stockData.drop("low", axis=1, inplace=True)
-    # stockData.drop("open", axis=1, inplace=True)
-    stockData.info()
-    stockData.corr() # see and plot correlations 
-    if(_print):
-        pd.plotting.scatter_matrix(stockData[["firstDiffAbs","newsRating"]])
-        pd.plotting.scatter_matrix(stockData[["close","newsRating"]])
-    plt.show()
+        # add news rating as colum to stockdata
+        stockData['newsRating'] = appleNews['rating']
 
-    stockData.to_csv("AAPL/stockData.csv")
+        stockData.info()
+        stockData.corr() # see and plot correlations 
+        if(_print):
+            pd.plotting.scatter_matrix(stockData[["firstDiffAbs","newsRating"]])
+            pd.plotting.scatter_matrix(stockData[["close","newsRating"]])
+        plt.show()
 
+    # stockData.to_csv("AAPL/stockData.csv")
+    # stockData.to_csv("AAPL/StockFull.csv")
     return stockData
     # print(appleNews['2018-05-08 '])
 # =======================================
-# data = process_stock(_print=False)
-training()
+# data = process_stock(_print=False,_loadnews=True)
+training(file="AAPL/stockData.csv")
+# training(file="AAPL/StockFull.csv")
