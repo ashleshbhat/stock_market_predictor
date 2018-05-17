@@ -38,7 +38,7 @@ def load_stock_data_daily(company="AAPL", output_size="compact"):
     return pd.read_csv(data_filename, parse_dates=['timestamp'])
 
 def load_stock_data_weekly(company="AAPL"):
-    data_filename = company+"/weekly_"+company+".csv"
+    data_filename = company+"/weekly_adjusted_"+company+".csv"
     return pd.read_csv(data_filename, parse_dates=['timestamp'])
 
 def load_news(company="AAPL"):
@@ -140,11 +140,14 @@ def process_stock(_stock="AAPL", _print=False, _type="compact",freq="daily" ,_lo
 
     stockData.set_index('timestamp',inplace=True)
 
+    # drop close column because only adjusted close is interesting because of the stock splits
+    stockData.drop('close', axis=1, inplace=True)
+
     # get first degree difference and create new column
     # Abssolute
-    stockData['firstDiffAbs'] = stockData["close"].diff(periods=-1)
+    stockData['firstDiffAbs'] = stockData["adjusted close"].diff(periods=-1)
     # percentage
-    stockData['firstDiff_%'] = stockData.firstDiffAbs/stockData.close * 100
+    stockData['firstDiff_%'] = stockData.firstDiffAbs/stockData["adjusted close"] * 100
 
     # check if news information shall be loaded for the stock
     if(_loadnews):
@@ -164,18 +167,18 @@ def process_stock(_stock="AAPL", _print=False, _type="compact",freq="daily" ,_lo
         stockData.corr() # see and plot correlations 
         if(_print):
             pd.plotting.scatter_matrix(stockData[["firstDiffAbs","newsRating"]])
-            pd.plotting.scatter_matrix(stockData[["close","newsRating"]])
+            pd.plotting.scatter_matrix(stockData[["adjusted close","newsRating"]])
         plt.show()
 
     # normalize data
     if _normalize:        
         stockData = normalizeData(stockData)
 
-    plt.plot(stockData['close'], color='red')
+    plt.plot(stockData['adjusted close'], color='blue')
     plt.show()
 
     # save processed file with new columns
-    stockData.to_csv(_stock+"/weekly_"+_stock+"_processed.csv")
+    stockData.to_csv(_stock+"/weekly_adjusted_"+_stock+"_processed.csv")
     # stockData.to_csv("AAPL/stockData.csv")
     # stockData.to_csv("AAPL/StockFull.csv")
     
