@@ -1,3 +1,4 @@
+#!python3
 """
 Class to score sentiment of text.
 
@@ -13,7 +14,7 @@ import re
 class SentimentAnalysis(object):
     """Class to get sentiment score based on analyzer."""
 
-    def __init__(self, filename='SentiWordNet.txt', weighting='geometric'):
+    def __init__(self, filename='sentiment\SentiWordNet.txt', weighting='geometric'):
         """Initialize with filename and choice of weighting."""
         if weighting not in ('geometric', 'harmonic', 'average'):
             raise ValueError(
@@ -189,4 +190,5 @@ class SentimentAnalysis(object):
         joined = '_'.join(words)
         return joined in self.swn_all
 
-s = SentimentAnalysis()
+# s = SentimentAnalysis()
+# print(s.score("i love you"))
