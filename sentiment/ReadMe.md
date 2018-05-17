@@ -13,11 +13,11 @@ The class handles negations and multiword expressions.
 
 - nltk including tokenizers
 - nltk resources to be downloaded
-`import nltk`
-`nltk.download('stopwords')`
-`nltk.download('punkt')`
-`nltk.download('averaged_perceptron_tagger')`
-`nltk.download('wordnet')`
+- `import nltk`
+- `nltk.download('stopwords')`
+- `nltk.download('punkt')`
+- `nltk.download('averaged_perceptron_tagger')`
+- `nltk.download('wordnet')`
 
 # Usage
 
