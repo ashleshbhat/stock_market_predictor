@@ -20,10 +20,12 @@ from scipy import signal
 import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler,MinMaxScaler
+from sklearn import preprocessing
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
 import sklearn.metrics as metrics
+import pandas_datareader.data as web
+import datetime
 # import numerical_algo
 
 
@@ -33,6 +35,10 @@ def load_stock_data_intraday(company,date):
 
 def load_stock_data_daily(company="AAPL", output_size="compact"):
     data_filename = "data/"+company+"/"+company+"_daily_"+output_size+".csv"
+    return pd.read_csv(data_filename, parse_dates=['timestamp'])
+
+def load_stock_data_weekly(company="AAPL"):
+    data_filename = company+"/weekly_"+company+".csv"
     return pd.read_csv(data_filename, parse_dates=['timestamp'])
 
 def load_news(company="AAPL"):
@@ -56,6 +62,21 @@ def playground():
 
     # print (total)
 # ==================================
+def readStockWeb(_stock="AAPL",freq="weekly"):
+    start   = datetime.datetime(2000,1,1)
+    end     = datetime.datetime.today()
+    # read from morningstar
+    dat = web.DataReader(_stock,"morningstar",start, end)
+    # print(dat)
+
+# function to normalize the stock data
+def normalizeData(df):      
+    min_max_scaler = preprocessing.MinMaxScaler()
+    df['open'] = min_max_scaler.fit_transform(df.open.values.reshape(-1,1))
+    df['high'] = min_max_scaler.fit_transform(df.high.values.reshape(-1,1))
+    df['low'] = min_max_scaler.fit_transform(df.low.values.reshape(-1,1))
+    df['close'] = min_max_scaler.fit_transform(df.close.values.reshape(-1,1))
+    return df
 def plot_bargraph(x, _data, _label="no_label", frame="weekly",_color="red"):
     #plot data
     fig, ax = plt.subplots(figsize=(15,7))
@@ -111,19 +132,23 @@ def training(file, k=5):
 
 
 
-def process_stock(stock="AAPL", _print=False, _type="compact",_loadnews=False):
-    stockData = load_stock_data_daily(stock, _type)
+def process_stock(_stock="AAPL", _print=False, _type="compact",freq="daily" ,_loadnews=False, _normalize=False):
+    if (freq == "daily"):
+        stockData = load_stock_data_daily(_stock, _type)
+    elif (freq == "weekly"):
+        stockData = load_stock_data_weekly(company=_stock)
+
     stockData.set_index('timestamp',inplace=True)
 
-    # get first degree difference
-    # Abs
+    # get first degree difference and create new column
+    # Abssolute
     stockData['firstDiffAbs'] = stockData["close"].diff(periods=-1)
     # percentage
     stockData['firstDiff_%'] = stockData.firstDiffAbs/stockData.close * 100
 
     # check if news information shall be loaded for the stock
     if(_loadnews):
-        appleNews = load_news(stock)
+        appleNews = load_news(_stock)
         appleNews.set_index('date', inplace=True)
         # create rating column and normalize values
         appleNews['rating'] = (appleNews.positive - appleNews.negative)/(appleNews.positive + abs(appleNews.negative))
@@ -142,11 +167,23 @@ def process_stock(stock="AAPL", _print=False, _type="compact",_loadnews=False):
             pd.plotting.scatter_matrix(stockData[["close","newsRating"]])
         plt.show()
 
+    # normalize data
+    if _normalize:        
+        stockData = normalizeData(stockData)
+
+    plt.plot(stockData['close'], color='red')
+    plt.show()
+
+    # save processed file with new columns
+    stockData.to_csv(_stock+"/weekly_"+_stock+"_processed.csv")
     # stockData.to_csv("AAPL/stockData.csv")
     # stockData.to_csv("AAPL/StockFull.csv")
+    
+    print ("processed the stock with Symbol: "+_stock)
+
     return stockData
-    # print(appleNews['2018-05-08 '])
 # =======================================
 # data = process_stock(_print=False,_loadnews=True)
-training(file="AAPL/stockData.csv")
+process_stock(freq="weekly",_normalize=False)
+# training(file="AAPL/stockData.csv")
 # training(file="AAPL/StockFull.csv")
