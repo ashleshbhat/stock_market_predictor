@@ -26,6 +26,7 @@ from sklearn.metrics import confusion_matrix
 import sklearn.metrics as metrics
 import pandas_datareader.data as web
 import datetime
+import technical_indicators as TI
 # import numerical_algo
 
 
@@ -148,6 +149,9 @@ def process_stock(_stock="AAPL", _print=False, _type="compact",freq="daily" ,_lo
     stockData['firstDiffAbs'] = stockData["adjusted close"].diff(periods=-1)
     # percentage
     stockData['firstDiff_%'] = stockData.firstDiffAbs/stockData["adjusted close"] * 100
+    
+    # add ROC-1
+    stockData = TI.rate_of_change(stockData,2)
 
     # check if news information shall be loaded for the stock
     if(_loadnews):
