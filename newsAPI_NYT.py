@@ -7,7 +7,8 @@ import os
 import csv
 import datetime
 import time
-
+import re
+import sentiment
 
 def get_NYT_data(querry,begin_date,end_date):
     url = ('https://api.nytimes.com/svc/search/v2/articlesearch.json?'
@@ -64,4 +65,51 @@ def get_NYT_multiple_weeks(number_of_weeks):
         date_end = date_end - datetime.timedelta(days = 7)
         time.sleep(0.5)
 
-get_NYT_multiple_weeks(1000)
+def compile_news_score(number_of_weeks):
+    date_end = datetime.datetime(2018,5,20)
+    filename_csv = "AAPL/NYT/newsinfo.csv"
+
+    header = ['date begin','date end','score','number of words','pos_simple','neg_simple']
+    s = sentiment.SentimentAnalysis()
+        
+    with open(filename_csv, 'w',newline='') as csvfile:
+        writer = csv.writer(csvfile, quoting=csv.QUOTE_NONE)
+        writer.writerow(header)
+        
+    for loop in range (0, number_of_weeks):
+        date_begin = date_end - datetime.timedelta(days = 6)
+        date_end_parsed = str(date_end).replace("-","")[0:8]
+        date_begin_parsed = str(date_begin).replace("-","")[0:8]
+        
+        pos_words = wordlist.get_word_list_pos()
+        neg_words = wordlist.get_word_list_neg()
+
+        print("working on the week "+str(date_begin)+" to "+str(date_end))
+        filename_txt = "AAPL/NYT/"+date_begin_parsed+"_"+date_end_parsed+".txt"
+        pos = 0
+        neg = 0
+        with open(filename_txt, 'r',encoding='utf-8') as myfile:
+            data=myfile.read().replace('\n', '')
+            data = re.sub(r'[^a-zA-Z ]+', '', data).replace("xexx","")
+            # data = re.sub(r'\W+', '', data)  
+            score = s.score(data)
+            for word in pos_words:
+                if (word) in (data.upper()):
+                    pos = pos +1
+                
+            for word in neg_words:
+                if word in data.upper():
+                    neg = neg +1
+
+            length =  len(data.split())
+            row_data = [date_begin,date_end,score,length,pos,neg]
+            with open(filename_csv, 'a',newline='') as csvfile:
+                writer = csv.writer(csvfile, quoting=csv.QUOTE_NONE)
+                writer.writerow(row_data)   
+        
+        date_end = date_end - datetime.timedelta(days = 7)
+
+
+# get_NYT_multiple_weeks(1000)
+
+compile_news_score(1500)
