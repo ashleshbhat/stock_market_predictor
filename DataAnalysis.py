@@ -27,8 +27,20 @@ import sklearn.metrics as metrics
 import pandas_datareader.data as web
 import datetime
 import technical_indicators as TI
+# neural netowork libraries
+from keras.models import Sequential
+from keras.layers.core import Dense, Dropout, Activation
+from keras.layers.recurrent import LSTM
+from keras.models import load_model
+
 # import numerical_algo
 
+# ====== input parameters =============
+seq_len = 22
+d = 0.2
+shape = [4, seq_len, 1] # feature, window, output
+neurons = [128, 128, 32, 1]
+# =====================================
 
 def load_stock_data_intraday(company,date):
     data_filename = "data/"+company+"/date/"+date+".csv"
@@ -94,6 +106,24 @@ def plot_bargraph(x, _data, _label="no_label", frame="weekly",_color="red"):
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %d'))
     
     plt.show()
+
+# create neural network model
+def create_nn_model(layers, neurons, d):
+    model = Sequential()
+    
+    model.add(LSTM(neurons[0], input_shape=(layers[1], layers[0]), return_sequences=True))
+    model.add(Dropout(d))
+        
+    model.add(LSTM(neurons[1], input_shape=(layers[1], layers[0]), return_sequences=False))
+    model.add(Dropout(d))
+        
+    model.add(Dense(neurons[2],kernel_initializer="uniform",activation='relu'))        
+    model.add(Dense(neurons[3],kernel_initializer="uniform",activation='linear'))
+    # model = load_model('my_LSTM_stock_model1000.h5')
+    # adam = keras.optimizers.Adam(decay=0.2)
+    model.compile(loss='mse',optimizer='adam', metrics=['accuracy'])
+    model.summary()
+    return model
 
 def training(file, k=5):
     # print (stockData.info())
@@ -196,3 +226,5 @@ process_stock(freq="weekly",_normalize=False)
 # training(file="AAPL/stockData.csv")
 # training(file="AAPL/StockFull.csv")
 training(file="AAPL/weekly_adjusted_AAPL_corr.csv")
+
+model_nn = create_nn_model(shape, neurons, d)
