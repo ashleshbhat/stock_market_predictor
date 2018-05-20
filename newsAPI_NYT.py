@@ -48,7 +48,7 @@ def get_NYT_data(querry,begin_date,end_date):
 
 
 def get_NYT_multiple_weeks(number_of_weeks):
-    date_end = datetime.datetime(2003,4,20)
+    date_end = datetime.datetime(2018,5,20)
     for loop in range (0, number_of_weeks):
         date_begin = date_end - datetime.timedelta(days = 6)
         date_end_parsed = str(date_end).replace("-","")[0:8]
@@ -64,4 +64,4 @@ def get_NYT_multiple_weeks(number_of_weeks):
         date_end = date_end - datetime.timedelta(days = 7)
         time.sleep(0.5)
 
-get_NYT_multiple_weeks(600)
+get_NYT_multiple_weeks(1000)
