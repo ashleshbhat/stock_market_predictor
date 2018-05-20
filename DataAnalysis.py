@@ -100,9 +100,10 @@ def training(file, k=5):
     stockData = pd.read_csv(file)
     stockData.dropna()
     # drop the columns open, high and low
-    stockData.drop("open", axis=1, inplace=True)
-    stockData.drop("high", axis=1, inplace=True)
-    stockData.drop("low", axis=1, inplace=True)
+    # stockData.drop("open", axis=1, inplace=True)
+    # stockData.drop("high", axis=1, inplace=True)
+    # stockData.drop("low", axis=1, inplace=True)
+    stockData.drop("dividend amount", axis=1, inplace=True)
 
     # save features to X
     X = stockData.drop("Action", axis=1)
@@ -178,8 +179,8 @@ def process_stock(_stock="AAPL", _print=False, _type="compact",freq="daily" ,_lo
     if _normalize:        
         stockData = normalizeData(stockData)
 
-    plt.plot(stockData['adjusted close'], color='blue')
-    plt.show()
+    # plt.plot(stockData['adjusted close'], color='blue')
+    # plt.show()
 
     # save processed file with new columns
     stockData.to_csv(_stock+"/weekly_adjusted_"+_stock+"_processed.csv")
@@ -194,3 +195,4 @@ def process_stock(_stock="AAPL", _print=False, _type="compact",freq="daily" ,_lo
 process_stock(freq="weekly",_normalize=False)
 # training(file="AAPL/stockData.csv")
 # training(file="AAPL/StockFull.csv")
+training(file="AAPL/weekly_adjusted_AAPL_corr.csv")
