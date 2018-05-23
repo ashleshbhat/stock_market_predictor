@@ -92,7 +92,7 @@ def normalizeData(df):
     df['open'] = min_max_scaler.fit_transform(df.open.values.reshape(-1,1))
     df['high'] = min_max_scaler.fit_transform(df.high.values.reshape(-1,1))
     df['low'] = min_max_scaler.fit_transform(df.low.values.reshape(-1,1))
-    df['adjusted close'] = min_max_scaler.fit_transform(df.close.values.reshape(-1,1))
+    df['adjusted close'] = min_max_scaler.fit_transform(df['adjusted close'].values.reshape(-1,1))
     return df
 def plot_bargraph(x, _data, _label="no_label", frame="weekly",_color="red"):
     #plot data
@@ -113,6 +113,15 @@ def plot_bargraph(x, _data, _label="no_label", frame="weekly",_color="red"):
     
     plt.show()
 
+def plot_result(stock_name, predicted, actual):
+    plt.plot(predicted, color='red', label='Prediction')
+    plt.plot(actual,color='blue', label='Actual')
+    plt.legend(loc='best')
+    plt.title('The test result for {}'.format(stock_name))
+    plt.xlabel('Days')
+    plt.ylabel('Adjusted Close')
+    plt.show()
+    
 def load_data(stock, seq_len):
     amount_of_features = len(stock.columns)
     data = stock.as_matrix() 
@@ -189,6 +198,10 @@ def training_classification(file, k=5):
     stockData.drop("high", axis=1, inplace=True)
     stockData.drop("low", axis=1, inplace=True)
     stockData.drop("dividend amount", axis=1, inplace=True)
+    stockData.drop("firstDiffAbs", axis=1, inplace=True)
+    stockData.drop("firstDiff_%", axis=1, inplace=True)
+    stockData.drop("volume", axis=1, inplace=True)
+    stockData.drop("ROC_2", axis=1, inplace=True)
 
     # save features to X
     X = stockData.drop("Action", axis=1)
@@ -227,23 +240,30 @@ def training_neuralnet(file):
     # create neural net
 
     stockData.drop("Action", axis=1, inplace=True) # drop Action column because not needed for regression
+    stockData.drop("volume", axis=1, inplace=True)
+    stockData.drop("dividend amount", axis=1, inplace=True)
+    # normalize the data
+    # stockData = normalizeData(stockData)
     X_train, y_train, X_test, y_test = load_data(stockData, seq_len)
     print(X_train.shape[0], X_train.shape[1], X_train.shape[2])
 
-    shape = [12, seq_len, 1] # feature, window, output
+
+    shape = [10, seq_len, 1] # feature, window, output
     model_nn = create_nn_model(shape, neurons, d)
     model_nn.fit(
         X_train,
         y_train,
         batch_size=512,
-        epochs=10,
+        epochs=5,
         validation_split=0.1,
         verbose=1
     )
 
     model_score(model_nn, X_train, y_train, X_test, y_test)
     p = percentage_difference(model_nn, X_test, y_test)
-    print(p)
+    # print(p)
+
+    plot_result("Apple",p, y_test)
 
     return model_nn
 
@@ -332,8 +352,8 @@ def addNews(file="AAPL/weekly_adjusted_AAPL_processed.csv", _loadnews=True,_prin
 # process_stock(freq="weekly",_normalize=False)
 # training(file="AAPL/stockData.csv")
 # training(file="AAPL/StockFull.csv")
-# training_classification(file="AAPL/weekly_adjusted_AAPL_corr.csv")
-nn = training_neuralnet("AAPL/weekly_adjusted_AAPL_corr.csv")
+training_classification(file="AAPL/weekly_adjusted_AAPL_corr.csv")
+# nn = training_neuralnet("AAPL/weekly_adjusted_AAPL_corr.csv")
 
 
 # addNews()
