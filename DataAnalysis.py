@@ -40,6 +40,7 @@ seq_len = 22
 d = 0.2
 shape = [4, seq_len, 1] # feature, window, output
 neurons = [128, 128, 32, 1]
+epochs = 300
 # =====================================
 
 def load_stock_data_intraday(company,date):
@@ -115,7 +116,7 @@ def plot_bargraph(x, _data, _label="no_label", frame="weekly",_color="red"):
 # create neural network model
 def create_nn_model(layers, neurons, d):
     model = Sequential()
-    
+    # [4, 22, 1]
     model.add(LSTM(neurons[0], input_shape=(layers[1], layers[0]), return_sequences=True))
     model.add(Dropout(d))
         
@@ -166,6 +167,23 @@ def training(file, k=5):
     accur = metrics.accuracy_score(Ytest,Yp)
     precision = metrics.precision_score(Ytest,Yp, average="macro")
     print ("Accuracy: ",accur,"\nPrecisionScore: ", precision)
+
+
+    # ===== neural network for prediction ========
+    # create neural net
+    
+
+    model_nn = create_nn_model(shape, neurons, d)
+    model_nn.fit(
+        Xtrain,
+        Ytrain,
+        batch_size=512,
+        epochs=epochs,
+        validation_split=0.1,
+        verbose=1
+    )
+    print(model_nn)
+
 
 
 
@@ -237,7 +255,6 @@ def addNews(file="AAPL/weekly_adjusted_AAPL_processed.csv", _loadnews=True,_prin
 # training(file="AAPL/StockFull.csv")
 training(file="AAPL/weekly_adjusted_AAPL_corr.csv")
 
-# model_nn = create_nn_model(shape, neurons, d)
 
 # newsNYT = pd.read_csv("AAPL/NYT/newsinfo.csv", parse_dates=['date begin'])
 # newsNYT.set_index('date begin',inplace=True)
