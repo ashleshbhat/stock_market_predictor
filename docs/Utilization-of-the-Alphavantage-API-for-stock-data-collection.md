@@ -1,0 +1,7 @@
+# The Alphavantage API
+
+Alpha Vantage delivers a free API for financial data and most used finance indicators in a simple json or CSV format. In our case for simplicity, we collected data in csv format. This module implements a python interface to the free API provided by Alpha Vantage (http://www.alphavantage.co/). It requires a free API, that can be requested on http://www.alphavantage.co/support/#api-key. You can have a look at all the api calls available in their documentation http://www.alphavantage.co/documentation.
+
+Alphavantage API can collect (1) Stock Time Series Data: Time Series Data provides real-time and historical equity data in 4 different temporal resolutions: (1) intraday, (2) daily, (3) weekly, and (4) monthly. Daily, weekly, and monthly time series contain up to 20 years of historical data. We have used weekly stock data since we found it more useful because for the news API we could only obtain news information on a weekly basis for a longer time period into the past. 
+
+From the available data set we have calculated the mean, local minimum and local maximum of stock values, later these computed values have been used as one of the contributions to defining the action for our analysis.
